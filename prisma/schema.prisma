@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  squads    Squad[]
+  createdAt DateTime @default(now())
+}
+
+model Squad {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  budget    Int           @default(100000000)
+  staff     StaffMember[]
+  createdAt DateTime      @default(now())
+}
+
+enum StaffRole {
+  DEFENSIVE_SPECIALIST
+  ATTACKING_SPECIALIST
+  SET_PIECE_COACH
+  ACADEMY_DIRECTOR
+  MIDFIELD_SPECIALIST
+}
+
+model StaffMember {
+  id          String    @id @default(cuid())
+  squadId     String
+  squad       Squad     @relation(fields: [squadId], references: [id])
+  role        StaffRole
+  isHeadCoach Boolean   @default(false)
+  managerId   String
+  price       Int
+}
+
+model Gameweek {
+  id       String   @id @default(cuid())
+  number   Int      @unique
+  deadline DateTime
+  isLocked Boolean  @default(false)
+}
